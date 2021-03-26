@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31025.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomationDriller", "AutomationDriller\AutomationDriller.csproj", "{913FDDBB-3A29-4C15-95CD-C23614CDEE78}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoPilot", "AutoPilot\AutoPilot.csproj", "{90A45860-E224-4678-A8D5-7BEFABCDC1D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkShopAutoLevel", "WorkShopAutoLevel\WorkShopAutoLevel.csproj", "{548588AE-B9DF-491F-B37D-C9E36B211636}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DockingPistonAutoRetract-Extend", "DockingPistonAutoRetract-Extend\DockingPistonAutoRetract-Extend.csproj", "{F3C64CF0-7F3D-4B9C-AE5E-B1D2817EF1D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirlockControl", "AirlockControl\AirlockControl.csproj", "{E470414F-C133-4E8A-A65F-5DE573B850F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarPanelSunTracker", "SolarPanelSunTracker\SolarPanelSunTracker.csproj", "{6986FAFF-B554-4ED5-9A9A-64C9EDD61D6B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7EC82EE-7A65-4874-B230-6EB904C8D8A4}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{913FDDBB-3A29-4C15-95CD-C23614CDEE78}.Debug|x64.ActiveCfg = Debug|x64
+		{913FDDBB-3A29-4C15-95CD-C23614CDEE78}.Debug|x64.Build.0 = Debug|x64
+		{90A45860-E224-4678-A8D5-7BEFABCDC1D2}.Debug|x64.ActiveCfg = Debug|x64
+		{90A45860-E224-4678-A8D5-7BEFABCDC1D2}.Debug|x64.Build.0 = Debug|x64
+		{548588AE-B9DF-491F-B37D-C9E36B211636}.Debug|x64.ActiveCfg = Debug|x64
+		{548588AE-B9DF-491F-B37D-C9E36B211636}.Debug|x64.Build.0 = Debug|x64
+		{F3C64CF0-7F3D-4B9C-AE5E-B1D2817EF1D4}.Debug|x64.ActiveCfg = Debug|x64
+		{F3C64CF0-7F3D-4B9C-AE5E-B1D2817EF1D4}.Debug|x64.Build.0 = Debug|x64
+		{E470414F-C133-4E8A-A65F-5DE573B850F0}.Debug|x64.ActiveCfg = Debug|x64
+		{E470414F-C133-4E8A-A65F-5DE573B850F0}.Debug|x64.Build.0 = Debug|x64
+		{6986FAFF-B554-4ED5-9A9A-64C9EDD61D6B}.Debug|x64.ActiveCfg = Debug|x64
+		{6986FAFF-B554-4ED5-9A9A-64C9EDD61D6B}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {10B0AADF-417F-4762-887E-7E259B2E7987}
+	EndGlobalSection
+EndGlobal
