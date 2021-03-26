@@ -66,15 +66,33 @@ namespace IngameScript
       var doorOneObj = GridTerminalSystem.GetBlockWithName(doorOne) as IMyDoor;
       var doorTwoObj = GridTerminalSystem.GetBlockWithName(doorTwo) as IMyDoor;
 
-      if (doorOneObj.Status == DoorStatus.Open)
+      Echo($"{doorOneObj.CustomName}: {doorOneObj.Status}");
+      Echo($"{doorOneObj.CustomName}: {doorTwoObj.Status}");
+      if (argument.ToUpper() != "OVERRIDE AIRLOCKS")
       {
-        if (doorTwoObj.Status == DoorStatus.Open || doorTwoObj.Status == DoorStatus.Opening)
-        doorTwoObj.CloseDoor();
-      }
-      else if (doorTwoObj.Status == DoorStatus.Open)
-      {
-        if (doorOneObj.Status == DoorStatus.Open || doorOneObj.Status == DoorStatus.Opening)
-          doorOneObj.CloseDoor();
+        if (doorOneObj.Status == DoorStatus.Open)
+        {
+          if (doorTwoObj.Status == DoorStatus.Open || doorTwoObj.Status == DoorStatus.Opening)
+          {
+            doorTwoObj.CloseDoor();
+          }
+          doorTwoObj.Enabled = false;
+          doorOneObj.Enabled = true;
+        }
+        else if (doorTwoObj.Status == DoorStatus.Open)
+        {
+          if (doorOneObj.Status == DoorStatus.Open || doorOneObj.Status == DoorStatus.Opening)
+          {
+            doorOneObj.CloseDoor();
+          }
+          doorTwoObj.Enabled = true;
+          doorOneObj.Enabled = false;
+        }
+        else
+        {
+          doorTwoObj.Enabled = true;
+          doorOneObj.Enabled = true;
+        }
       }
     }
   }
