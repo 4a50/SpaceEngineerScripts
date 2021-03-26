@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomationDriller", "Automa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoPilot", "AutoPilot\AutoPilot.csproj", "{90A45860-E224-4678-A8D5-7BEFABCDC1D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkShopAutoLevel", "WorkShopAutoLevel\WorkShopAutoLevel.csproj", "{548588AE-B9DF-491F-B37D-C9E36B211636}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DockingPistonAutoRetract-Extend", "DockingPistonAutoRetract-Extend\DockingPistonAutoRetract-Extend.csproj", "{F3C64CF0-7F3D-4B9C-AE5E-B1D2817EF1D4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirlockControl", "AirlockControl\AirlockControl.csproj", "{E470414F-C133-4E8A-A65F-5DE573B850F0}"
@@ -29,8 +27,6 @@ Global
 		{913FDDBB-3A29-4C15-95CD-C23614CDEE78}.Debug|x64.Build.0 = Debug|x64
 		{90A45860-E224-4678-A8D5-7BEFABCDC1D2}.Debug|x64.ActiveCfg = Debug|x64
 		{90A45860-E224-4678-A8D5-7BEFABCDC1D2}.Debug|x64.Build.0 = Debug|x64
-		{548588AE-B9DF-491F-B37D-C9E36B211636}.Debug|x64.ActiveCfg = Debug|x64
-		{548588AE-B9DF-491F-B37D-C9E36B211636}.Debug|x64.Build.0 = Debug|x64
 		{F3C64CF0-7F3D-4B9C-AE5E-B1D2817EF1D4}.Debug|x64.ActiveCfg = Debug|x64
 		{F3C64CF0-7F3D-4B9C-AE5E-B1D2817EF1D4}.Debug|x64.Build.0 = Debug|x64
 		{E470414F-C133-4E8A-A65F-5DE573B850F0}.Debug|x64.ActiveCfg = Debug|x64
