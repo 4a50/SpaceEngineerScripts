@@ -47,29 +47,38 @@ namespace IngameScript
     {
       Runtime.UpdateFrequency = UpdateFrequency.Update10;
     }
-      
+
 
     public void Main(string argument, UpdateType updateSource)
     {
       IMyGasTank ht4 = GridTerminalSystem.GetBlockGroupWithName("Ship Hydrogen Tank 4") as IMyGasTank;
-      
+      List<IMyCargoContainer> cargo = new List<IMyCargoContainer>();
+      GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(cargo);
+      cargo[0].
+      IMyTextSurface display = GridTerminalSystem.GetBlockWithName("Tank LCD Control") as IMyTextSurface;
+      StringBuilder sb = new StringBuilder();
       IMyBlockGroup hydrogenTankBlocks = GridTerminalSystem.GetBlockGroupWithName("Ship Hydrogen Tanks");
       List<IMyGasTank> hydrogenTanks = new List<IMyGasTank>();
       hydrogenTankBlocks.GetBlocksOfType<IMyGasTank>(hydrogenTanks);
+      sb.AppendLine("Hydrogen Tanks Status\n----------");
 
-      Echo($"Capacity: {ht4.Capacity}");
-      Echo($"FillRatio: {ht4.FilledRatio}");
+      // Echo($"Capacity: {ht4.Capacity}");
+      // Echo($"FillRatio: {ht4.FilledRatio}");
       double[] tankValues = HydrogenTankDisplay(hydrogenTanks);
+      Echo($"Len tankValues: {tankValues.Length}");
       for (int i = 0; i < tankValues.Length; i++)
       {
         if (i != tankValues.Length - 1)
         {
-          Echo($"Hydrogen Tank {i + 1}: {tankValues[i] * 100}");
+          Echo($"Hydrogen Tank {i + 1}: {Math.Round(tankValues[i] * 100, 2)}%");
+          sb.AppendLine($"Tank {i + 1}: {Math.Round(tankValues[i] * 100, 2)}%");
         }
         else
         {
-          Echo($"Total Capacity: {tankValues[i]* 100}");
+          Echo($"Total Tanks: {Math.Round(tankValues[i] * 100, 2)}%");
+          sb.AppendLine($"Total Tanks: {Math.Round(tankValues[i] * 100, 2)}%");
         }
+        display.WriteText(sb.ToString());
       }
     }
     double[] HydrogenTankDisplay(List<IMyGasTank> hydTank)
