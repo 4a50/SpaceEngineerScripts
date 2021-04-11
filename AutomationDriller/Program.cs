@@ -45,38 +45,71 @@ namespace IngameScript
 
     public Program()
     {
-      Runtime.UpdateFrequency = UpdateFrequency.Update100;
-    }
-
-    public void Save()
-    {
-      // Called when the program needs to save its state. Use
-      // this method to save your state to the Storage field
-      // or some other means. 
-      // 
-      // This method is optional and can be removed if not
-      // needed.
-    }
+      Runtime.UpdateFrequency = UpdateFrequency.Update10;
+    }   
 
     public void Main(string argument, UpdateType updateSource)
     {
-      string rotorName = "Advanced Rotor Driller";
-      IMyPistonBase PistonOne = GridTerminalSystem.GetBlockWithName("P1") as IMyPistonBase;
-     // IMyPistonBase PistonTwo = GridTerminalSystem.GetBlockWithName("Pi2") as IMyPistonBase;
-      //IMyPistonBase PistonThree = GridTerminalSystem.GetBlockWithName("P3") as IMyPistonBase;
       
-      IMyMotorAdvancedStator rotor;
+      IMyPistonBase PistonOne = GridTerminalSystem.GetBlockWithName("Piston") as IMyPistonBase;
+      IMyPistonBase PistonTwo = GridTerminalSystem.GetBlockWithName("Piston 2") as IMyPistonBase;
+      IMyPistonBase PistonThree = GridTerminalSystem.GetBlockWithName("Piston 3") as IMyPistonBase;
+      IMyCargoContainer StorageBlock = GridTerminalSystem.GetBlockWithName("Large Cargo Container") as IMyCargoContainer;
+      IMyMotorAdvancedStator Rotor = GridTerminalSystem.GetBlockWithName("Advanced Rotor") as IMyMotorAdvancedStator;
+      IMyBlockGroup Drills = GridTerminalSystem.GetBlockGroupWithName("Drillers");
+      IMyProgrammableBlock programmableBlock = GridTerminalSystem.GetBlockWithName("Programmable block") as IMyProgrammableBlock;
+      IMyTextSurface screen = ((IMyTextSurfaceProvider)programmableBlock).GetSurface(0);
+      screen.WriteText("1234");
 
-      rotor = GridTerminalSystem.GetBlockWithName(rotorName) as IMyMotorAdvancedStator;
-      if (rotor == null)
+      if (Drills == null)
+      {
+        Echo("Drillers group not found");
+        return; 
+      }
+      List<IMyTerminalBlock> listBlocks = new List<IMyTerminalBlock>();
+      Drills.GetBlocks(listBlocks);
+      
+      Echo($"{PistonOne.CustomName}");
+      Echo($"{PistonTwo.CustomName}");
+      Echo($"{PistonThree.CustomName}");
+      Echo($"{StorageBlock.CustomName}");
+      Echo($"{Rotor.CustomName}");
+      Echo($"Number of Drills: {listBlocks.Count}");
+      Echo($"Current Mass of {StorageBlock.CustomName}: {StorageBlock.Mass}");
+      var storageBlock = StorageBlock.GetInventory();
+      MyFixedPoint storageBlockVolume = storageBlock.CurrentVolume;
+      float volume = (float)storageBlockVolume;
+      float maxVolume = (float)storageBlock.MaxVolume;
+      Echo($"Current Volume: {volume}");      
+
+      if (Rotor == null)
       {
         Echo("Rotor Block Not Found");
         return;
       }
+      if (volume >= maxVolume)
+      {
+        Echo("[WARNING] Cargo Full");
+        Rotor.RotorLock = true;
+        foreach (var drill in listBlocks)
+        {
+          var d = drill as IMyShipDrill;
+          d.Enabled = false;
+        }
+      }
+      else
+      {
+        Rotor.RotorLock = false;
+        foreach (var drill in listBlocks)
+        {
+          var d = drill as IMyShipDrill;
+          d.Enabled = true;
+        }
+      }
       //180/piRads
-      double rotorAngle = rotor.Angle * (180 / Math.PI);
+      double rotorAngle = Rotor.Angle * (180 / Math.PI);
       //double rotorAngle = 180 / (Math.PI * rotor.Angle);
-      Echo("Rotor Angle: " + rotorAngle);
+      Echo("Rotor Angle: " + Math.Round(rotorAngle, 2));
       if (rotorAngle < 40 && rotorAngle > 39.9)
       {
         if (PistonOne.CurrentPosition < 10)
@@ -87,10 +120,10 @@ namespace IngameScript
         {
           PistonTwo.MaxLimit += 1;
         }
-        //else if (PistonThree.CurrentPosition < 10)
-        //{
-        //  PistonThree.MaxLimit += 1;
-        //}
+        else if (PistonThree.CurrentPosition < 10)
+        {
+          PistonThree.MaxLimit += 1;
+        }
       }
     }
   }

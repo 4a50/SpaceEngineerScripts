@@ -43,6 +43,7 @@ namespace IngameScript
       Echo($"{doorOneObj.CustomName}: {doorOneObj.Status}");
       Echo($"{doorOneObj.CustomName}: {doorTwoObj.Status}");
       Echo($"{airVentObj.CustomName} Airtight: {airVentObj.Status}");
+      // If overriding airlock not desired.
       if (argument.ToUpper() != "OVERRIDE AIRLOCKS")
       {
         if (doorOneObj.Status == DoorStatus.Open)

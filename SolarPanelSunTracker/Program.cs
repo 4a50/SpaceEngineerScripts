@@ -45,80 +45,124 @@ namespace IngameScript
 
     public Program()
     {
-      // The constructor, called only once every session and
-      // always before any other method is called. Use it to
-      // initialize your script. 
-      //     
-      // The constructor is optional and can be removed if not
-      // needed.
-      // 
-      // It's recommended to set Runtime.UpdateFrequency 
-      // here, which will allow your script to run itself without a 
-      // timer block.
+      Runtime.UpdateFrequency = UpdateFrequency.Update10;
     }
-
-    public void Save()
-    {
-      // Called when the program needs to save its state. Use
-      // this method to save your state to the Storage field
-      // or some other means. 
-      // 
-      // This method is optional and can be removed if not
-      // needed.
-    }
-
     void Main()
     {
 
-      var rotor = GridTerminalSystem.GetBlockWithName("Rotor 2") as IMyMotorStator;
-      IMyTextSurface surface = GridTerminalSystem.GetBlockWithName("LCD Panel") as IMyTextSurface;
+      IMyTextSurface screen = GridTerminalSystem.GetBlockWithName("LCD Solar Array") as IMyTextSurface;
+      IMyMotorStator rotorRight = GridTerminalSystem.GetBlockWithName("Rotor Solar Right") as IMyMotorStator;
+      IMyMotorStator rotorLeft = GridTerminalSystem.GetBlockWithName("Rotor Solar Left") as IMyMotorStator;
+      IMyBlockGroup solarArrayRightBlocks = GridTerminalSystem.GetBlockGroupWithName("Solar Array Right");
+      IMyBlockGroup solarArrayLeftBlocks = GridTerminalSystem.GetBlockGroupWithName("Solar Array Left");
+      if (solarArrayRightBlocks == null) Echo("[Error] Right Solar Array Group Null");
+      if (solarArrayLeftBlocks == null) Echo("[Error] Left Solar Array Group Null");
+      //IMyTextSurface surface = GridTerminalSystem.GetBlockWithName("LCD Panel") as IMyTextSurface;
       IMyBatteryBlock battery = GridTerminalSystem.GetBlockWithName("Battery") as IMyBatteryBlock;
-      float pwrNow;
-      float pwrLast;
-      double rotorAngle = (rotor.Angle * 180) / 3.14; //1rad × 180/π = 57.296°
+      //float pwrNow;
+      //float pwrLast;
+      double rotorRightAngle = Math.Round((rotorRight.Angle * 180) / 3.14, 2); //1rad × 180/π = 57.296°
+      double rotorLeftAngle = Math.Round((rotorLeft.Angle * 180) / 3.14); //1rad × 180/π = 57.296°
+      List<IMySolarPanel> solarArrayRight = new List<IMySolarPanel>();
+      List<IMySolarPanel> solarArrayLeft = new List<IMySolarPanel>();
+      solarArrayRightBlocks.GetBlocksOfType<IMySolarPanel>(solarArrayRight);
+      solarArrayLeftBlocks.GetBlocksOfType<IMySolarPanel>(solarArrayLeft);
+      float solarRightInPower = (float)Math.Round(solarArrayRight[0].CurrentOutput * 1000, 2); //kW
+      float solarLeftInPower = (float)Math.Round(solarArrayLeft[0].CurrentOutput * 1000); //kW      
+      float lastPowerReadingLeft = 0;
+      float lastPowerReadingRight = 0;
+      bool leftRotating = false;
+      bool rightRotating = true;
+      StringBuilder sb = new StringBuilder();
 
+      sb.AppendLine($"Total Power Generated: {GetTotalPower(solarArrayLeft, solarArrayRight)} kW");
+      //sb.AppendLine($"Right Array Solar Count: {solarArrayRight.Count}");
+      sb.AppendLine($"Left Array Solar Count: {solarArrayLeft.Count}");
+      //sb.AppendLine($"Right Panel Sample Charge: {Math.Round(solarRightInPower, 2)} kw");
+      sb.AppendLine($"Left Panel Sample Charge: {Math.Round(solarLeftInPower, 2)} kw");
+      sb.AppendLine($"Left Rotor Angle: {rotorLeftAngle}");
+      sb.AppendLine($"Left Rotor Angle Rounded: {Math.Round(rotorLeftAngle)}");
       if (Storage == null)
       {
-        Echo("Storage Empty");
-        pwrLast = 0;
+        sb.AppendLine("Storage Empty");
+        lastPowerReadingLeft = 0;
+        lastPowerReadingRight = 0;
       }
       else
       {
-        pwrLast = float.Parse(Storage);
-      }
-      float currentInput = (battery.CurrentInput) * 1000;
-      Math.Round(currentInput, 2);
-      pwrNow = battery.CurrentInput;
-      pwrNow = currentInput;
-      if (pwrNow == 0)
-      {
-        if ((rotorAngle < 270 && rotorAngle > 0) && (rotorAngle > 280 && rotorAngle < 360))
+        string[] retrievedFromStorage = Storage.Split(',');
+        sb.AppendLine($"Length Of Storage: {retrievedFromStorage.Length}");
+        sb.AppendLine($"StorageLeft Reading: {retrievedFromStorage[0]} isRotatingLeft: {retrievedFromStorage[2]}");
+        if (retrievedFromStorage.Length < 4)
         {
-          rotor.TargetVelocityRPM = 0;
+          sb.AppendLine("Storage String Cannot be Parsed");
         }
         else
         {
-          rotor.TargetVelocityRPM = 1;
-
+          sb.AppendLine($"{retrievedFromStorage[0]} {retrievedFromStorage[1]} {retrievedFromStorage[2]} {retrievedFromStorage[3]}");
+          lastPowerReadingLeft = float.Parse(retrievedFromStorage[0]);
+          lastPowerReadingRight = float.Parse(retrievedFromStorage[1]);
+          leftRotating = bool.Parse(retrievedFromStorage[2]);
+          rightRotating = bool.Parse(retrievedFromStorage[3]);
         }
-
       }
-      else if (pwrNow > pwrLast || pwrNow >= 250)
+      //If no sun return to 0 degrees
+      if (solarLeftInPower == 0)
       {
-        rotor.SetValueFloat("Velocity", 0);
-        rotor.TargetVelocityRPM = 0;
-        Storage = pwrNow.ToString();
-      }
-      else if (pwrNow < pwrLast)
-      {
-        //rotor.ApplyAction("Reverse");
-        if (rotor.TargetVelocityRPM == 0)
+        sb.AppendLine("Setting Left Array");
+        if (rotorLeftAngle == 45)
         {
-          rotor.SetValueFloat("Velocity", .25F);
+          rotorLeft.TargetVelocityRPM = 0;
+          leftRotating = false;
+        }
+        else if (rotorLeftAngle > 180) { rotorLeft.TargetVelocityRPM = 1; }
+        else { rotorLeft.TargetVelocityRPM = -1; }
+      }
+      else if (solarLeftInPower < lastPowerReadingLeft)
+      {
+        sb.AppendLine($"LeftIn Power < lastPower Reading");
+        if (leftRotating)
+        {
+          rotorLeft.ApplyAction("Reverse");
+        }
+        else
+        {
+          rotorLeft.TargetVelocityRPM = -.25f;
         }
       }
-      surface.WriteText("Rotor Angle: " + rotorAngle + "\nPower Input: " + currentInput.ToString() + "\nPwrLast: " + pwrLast.ToString()
-      + "kW\npwrNow: " + pwrNow.ToString() + "kW\n");
+      else
+      {
+        sb.AppendLine($"LeftIn Power >= lastPower Reading");
+        sb.AppendLine("Stopped Left Array");
+        rotorLeft.TargetVelocityRPM = 0;
+      }
+      string storageString = $"{solarLeftInPower},{solarRightInPower},{leftRotating.ToString()},{rightRotating.ToString()}";
+      Storage = storageString;
+      screen.WriteText(sb.ToString());
+    }
+
+    float GetTotalPower (List<IMySolarPanel> left, List<IMySolarPanel> right)
+    {
+      float totalPower = 0;
+      foreach (IMySolarPanel sp in left) 
+      {
+        Echo(sp.CustomName);
+        totalPower += sp.CurrentOutput; 
+      }
+      foreach (IMySolarPanel sp in right) { totalPower += sp.CurrentOutput; }
+    
+      return totalPower;
+    }
+    public class SolarArray
+    {
+      IMyMotorStator Rotor { get; set; }  
+      double RotorAngleDegrees { get; set; }
+      List<IMySolarPanel> SolarArrayPanelList { get; set; }
+      float SolarInPower { get; set; }
+      float LastPowerReading { get; set; }
+      bool IsRotating { get; set; }
+      StringBuilder sb = new StringBuilder();
+
     }
   }
 }

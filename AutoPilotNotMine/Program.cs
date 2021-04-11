@@ -45,7 +45,16 @@ namespace IngameScript
 
     public Program()
     {
-      Runtime.UpdateFrequency = UpdateFrequency.Update10;
+      // The constructor, called only once every session and
+      // always before any other method is called. Use it to
+      // initialize your script. 
+      //     
+      // The constructor is optional and can be removed if not
+      // needed.
+      // 
+      // It's recommended to set Runtime.UpdateFrequency 
+      // here, which will allow your script to run itself without a 
+      // timer block.
     }
 
     public void Save()
@@ -58,47 +67,17 @@ namespace IngameScript
       // needed.
     }
 
-
     public void Main(string argument, UpdateType updateSource)
     {
-      double levelElevation = 10000.00;
-      double slowElevation = 8000;
-      double stopVelocity = 1000;
-
-
-      IMyRemoteControl remoteControl = GridTerminalSystem.GetBlockWithName("Remote Control") as IMyRemoteControl;
-      IMyGyro gyroscope = GridTerminalSystem.GetBlockWithName("Gyroscope") as IMyGyro;
-      IMyCockpit cockpit = GridTerminalSystem.GetBlockWithName("Control Seat") as IMyCockpit;
-      IMyProgrammableBlock autoLevel = (IMyProgrammableBlock)GridTerminalSystem.GetBlockWithName("Prog Block Auto Level");
-      Echo(remoteControl.CustomName);
-      Echo(gyroscope.CustomName);
-      StringBuilder sb = new StringBuilder();
-
-      double basicVel = remoteControl.GetShipSpeed();
-      double elevation;
-      remoteControl.TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
-
-      sb.AppendLine($"Vel: {basicVel}\n Elev: {elevation.ToString("0.00")}");
-      
-        if (stopVelocity <= elevation) sb.AppendLine($"Level Limit Reached");
-        else if (slowElevation <= elevation) sb.AppendLine($"Level Limit Reached");
-        else if (levelElevation <= elevation) sb.AppendLine($"Level Limit Reached");
-
-        Write(sb.ToString(), cockpit);
-      
-
+      // The main entry point of the script, invoked every time
+      // one of the programmable block's Run actions are invoked,
+      // or the script updates itself. The updateSource argument
+      // describes where the update came from. Be aware that the
+      // updateSource is a  bitfield  and might contain more than 
+      // one update type.
+      // 
+      // The method itself is required, but the arguments above
+      // can be removed if not needed.
     }
-    void Write(string text, IMyCockpit cockpit, bool apnd = false, int screenNumber = 0)
-    {
-      //For Control Seat Screens:
-      //    0 - Center
-      //    1 - Top Left
-      //    2 - Top Right
-      //    3 - Bottom  Left
-      //    4 - Top Left
-      IMyTextSurface screen = ((IMyTextSurfaceProvider)cockpit).GetSurface(screenNumber);
-      screen.WriteText(text);
-    }
-    
   }
 }

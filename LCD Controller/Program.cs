@@ -51,20 +51,50 @@ namespace IngameScript
 
     public void Main(string argument, UpdateType updateSource)
     {
-      IMyGasTank ht4 = GridTerminalSystem.GetBlockGroupWithName("Ship Hydrogen Tank 4") as IMyGasTank;
+      IMyTextSurface hydDisplay = GridTerminalSystem.GetBlockWithName("Tank LCD Control") as IMyTextSurface;
+      IMyTextSurface statDisp = GridTerminalSystem.GetBlockWithName("LCD Stats One") as IMyTextSurface;
+      IMyTextSurface[] buttonScreen = ButtonPanelTextAssignments("Button Panel One");
+      IMyShipConnector lowerConnector = GridTerminalSystem.GetBlockWithName("Connector Ship Lower") as IMyShipConnector;
+      //Left to Right
+      buttonScreen[0].WriteText("Close\nAll\nShip\nDoors");
+      buttonScreen[3].WriteText($"Lower\nConnector\n{lowerConnector.Status.ToString()}");
+
+
+      IMyBlockGroup airVents = GridTerminalSystem.GetBlockGroupWithName("Air Vents Ship ALL");
+      IMyBlockGroup hydrogenTankBlocks = GridTerminalSystem.GetBlockGroupWithName("Ship Hydrogen Tanks");
+
+      string hydStat = HydrogenTankDisplay(hydrogenTankBlocks);
+      string airVentStat = AirTightCheck(airVents, statDisp);
+
+      hydDisplay.WriteText(hydStat);
+      statDisp.WriteText(airVentStat);
+    }
+    string HydrogenTankDisplay(IMyBlockGroup hydrogenTankBlocks)
+    {
       List<IMyCargoContainer> cargo = new List<IMyCargoContainer>();
       GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(cargo);
-      cargo[0].
-      IMyTextSurface display = GridTerminalSystem.GetBlockWithName("Tank LCD Control") as IMyTextSurface;
+
       StringBuilder sb = new StringBuilder();
-      IMyBlockGroup hydrogenTankBlocks = GridTerminalSystem.GetBlockGroupWithName("Ship Hydrogen Tanks");
+
       List<IMyGasTank> hydrogenTanks = new List<IMyGasTank>();
       hydrogenTankBlocks.GetBlocksOfType<IMyGasTank>(hydrogenTanks);
-      sb.AppendLine("Hydrogen Tanks Status\n----------");
 
-      // Echo($"Capacity: {ht4.Capacity}");
-      // Echo($"FillRatio: {ht4.FilledRatio}");
-      double[] tankValues = HydrogenTankDisplay(hydrogenTanks);
+
+
+
+      sb.AppendLine("Hydrogen Tanks Status\n----------");
+      double[] tankValues = new double[hydrogenTanks.Count + 1];
+      double totalCapacity = hydrogenTanks[0].Capacity * hydrogenTanks.Count;
+      double cumulativeCapacity = 0;
+
+
+      for (int i = 0; i < hydrogenTanks.Count; i++)
+      {
+        tankValues[i] = hydrogenTanks[i].FilledRatio;
+        cumulativeCapacity += hydrogenTanks[i].FilledRatio * hydrogenTanks[i].Capacity;
+      }
+      tankValues[hydrogenTanks.Count] = cumulativeCapacity / totalCapacity;
+
       Echo($"Len tankValues: {tankValues.Length}");
       for (int i = 0; i < tankValues.Length; i++)
       {
@@ -78,24 +108,49 @@ namespace IngameScript
           Echo($"Total Tanks: {Math.Round(tankValues[i] * 100, 2)}%");
           sb.AppendLine($"Total Tanks: {Math.Round(tankValues[i] * 100, 2)}%");
         }
-        display.WriteText(sb.ToString());
+
       }
+      return sb.ToString();
+
     }
-    double[] HydrogenTankDisplay(List<IMyGasTank> hydTank)
+    string AirTightCheck(IMyBlockGroup ventBlocks, IMyTextSurface disp)
     {
-      double[] tankValues = new double[hydTank.Count + 1];
-      double totalCapacity = hydTank[0].Capacity * hydTank.Count;
-      double cumulativeCapacity = 0;
+      List<IMyAirVent> airVents = new List<IMyAirVent>();
+      ventBlocks.GetBlocksOfType<IMyAirVent>(airVents);
+
+      Color fontColor = new Color(0, 150, 0);
       StringBuilder sb = new StringBuilder();
-
-      for (int i = 0; i < hydTank.Count; i++)
+      sb.AppendLine("Air Integrity Status");
+      sb.AppendLine("--------------------");
+      foreach (IMyAirVent av in airVents)
       {
-        tankValues[i] = hydTank[i].FilledRatio;
-        cumulativeCapacity += hydTank[i].FilledRatio * hydTank[i].Capacity;
-      }
-      tankValues[hydTank.Count] = cumulativeCapacity / totalCapacity;
+        VentStatus ventStatus = av.Status;
 
-      return tankValues;
+        sb.AppendLine($"{av.CustomName}: {ventStatus.ToString()}");
+        if (ventStatus == VentStatus.Depressurized || ventStatus == VentStatus.Depressurizing)
+        {
+          disp.FontColor = Color.Red;
+        }
+        else { disp.FontColor = fontColor; }
+      }
+      return (sb.ToString());
+    }
+
+    IMyTextSurface[] ButtonPanelTextAssignments(string lcdPanelName)
+    {
+      IMyButtonPanel bp = GridTerminalSystem.GetBlockWithName("Button Panel One") as IMyButtonPanel;
+      int numButtonScreens = ((IMyTextSurfaceProvider)bp).SurfaceCount;
+      IMyTextSurface[] screens = new IMyTextSurface[numButtonScreens];
+      for (int i = 0; i < screens.Length; i++)      
+      {
+        screens[i] = ((IMyTextSurfaceProvider)bp).GetSurface(i);
+        screens[i].BackgroundColor = new Color(0, 80, 255);
+        screens[i].FontColor = new Color(255, 255, 255);
+        screens[i].Alignment = TextAlignment.CENTER;
+        screens[i].FontSize = 2.5f;
+
+      }
+      return screens;
     }
   }
 }
