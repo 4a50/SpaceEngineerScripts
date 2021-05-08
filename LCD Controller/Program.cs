@@ -51,8 +51,13 @@ namespace IngameScript
 
     public void Main(string argument, UpdateType updateSource)
     {
+      //LCD Screens
       IMyTextSurface hydDisplay = GridTerminalSystem.GetBlockWithName("Tank LCD Control") as IMyTextSurface;
       IMyTextSurface statDisp = GridTerminalSystem.GetBlockWithName("LCD Stats One") as IMyTextSurface;
+      IMyTextSurface buidMaterialDisplay = GridTerminalSystem.GetBlockWithName("LCD BuildItems") as IMyTextSurface;
+
+
+      //Button Displays
       IMyTextSurface[] buttonScreen = ButtonPanelTextAssignments("Button Panel One");
       IMyShipConnector lowerConnector = GridTerminalSystem.GetBlockWithName("Connector Ship Lower") as IMyShipConnector;
       //Left to Right
@@ -65,9 +70,11 @@ namespace IngameScript
 
       string hydStat = HydrogenTankDisplay(hydrogenTankBlocks);
       string airVentStat = AirTightCheck(airVents, statDisp);
+      //string buildMaterialsStatus = BuildMaterials();
 
       hydDisplay.WriteText(hydStat);
       statDisp.WriteText(airVentStat);
+      //buidMaterialDisplay.WriteText(buildMaterialsStatus);
     }
     string HydrogenTankDisplay(IMyBlockGroup hydrogenTankBlocks)
     {
@@ -117,8 +124,10 @@ namespace IngameScript
     {
       List<IMyAirVent> airVents = new List<IMyAirVent>();
       ventBlocks.GetBlocksOfType<IMyAirVent>(airVents);
+      bool isShipAirtight = true;
 
       Color fontColor = new Color(0, 150, 0);
+      Color alertColor = new Color(255, 0, 0);
       StringBuilder sb = new StringBuilder();
       sb.AppendLine("Air Integrity Status");
       sb.AppendLine("--------------------");
@@ -127,12 +136,14 @@ namespace IngameScript
         VentStatus ventStatus = av.Status;
 
         sb.AppendLine($"{av.CustomName}: {ventStatus.ToString()}");
-        if (ventStatus == VentStatus.Depressurized || ventStatus == VentStatus.Depressurizing)
-        {
-          disp.FontColor = Color.Red;
-        }
-        else { disp.FontColor = fontColor; }
+        if (ventStatus == VentStatus.Depressurized || ventStatus == VentStatus.Depressurizing) isShipAirtight = false;        
       }
+      if (!isShipAirtight)
+      {
+        disp.FontColor = alertColor;
+        Echo("[Warning] Ship is Not airtight");
+      }
+      else { disp.FontColor = fontColor; }
       return (sb.ToString());
     }
 
@@ -152,5 +163,21 @@ namespace IngameScript
       }
       return screens;
     }
+  string BuildMaterials()
+  {
+      List<IMyCargoContainer> cargo = new List<IMyCargoContainer>();
+      GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(cargo);
+
+      StringBuilder sb = new StringBuilder();
+      IMyInventory inv = cargo[0].GetInventory();      
+      if (inv == null) { sb.AppendLine("inventory is null"); }
+      List <MyInventoryItem> inventoryItems = new List<MyInventoryItem>();
+      inv.GetItems(inventoryItems);
+      Echo($"Item ID: {inventoryItems[0].ItemId}");
+
+
+
+      return sb.ToString();
+  }
   }
 }

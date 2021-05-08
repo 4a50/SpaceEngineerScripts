@@ -32,49 +32,60 @@ namespace IngameScript
     {
       //Names of the Doors for the airlock.
       //Comment out the AirVents items if one is not present.
-      string doorOne = "AirlockOne";
-      string doorTwo = "AirlockTwo";
-      string airVent = "AirVentOne";
+      string outerDoorName = "Sliding Door Airlock Outer";
+      string doorInnerName = "Sliding Door Airlock Inner";
+      string sideDoorName = "Offset Door Passage LQ";
+      string airVent = "Air Vent Airlockpro";
 
-      var doorOneObj = GridTerminalSystem.GetBlockWithName(doorOne) as IMyDoor;
-      var doorTwoObj = GridTerminalSystem.GetBlockWithName(doorTwo) as IMyDoor;
+      var doorOuter = GridTerminalSystem.GetBlockWithName(outerDoorName) as IMyDoor;
+      var doorInner = GridTerminalSystem.GetBlockWithName(doorInnerName) as IMyDoor;
+      IMyDoor sideDoor = GridTerminalSystem.GetBlockWithName(sideDoorName) as IMyDoor;
       var airVentObj = GridTerminalSystem.GetBlockWithName(airVent) as IMyAirVent;
 
-      Echo($"{doorOneObj.CustomName}: {doorOneObj.Status}");
-      Echo($"{doorOneObj.CustomName}: {doorTwoObj.Status}");
+      Echo($"{doorOuter.CustomName}: {doorOuter.Status}");
+      Echo($"{doorOuter.CustomName}: {doorInner.Status}");
+      Echo($"{sideDoor.CustomName}: {sideDoor.Status}");
       Echo($"{airVentObj.CustomName} Airtight: {airVentObj.Status}");
-      // If overriding airlock not desired.
-      if (argument.ToUpper() != "OVERRIDE AIRLOCKS")
-      {
-        if (doorOneObj.Status == DoorStatus.Open)
+     // Outer Door Logic
+      if (doorOuter.Status == DoorStatus.Open || doorOuter.Status == DoorStatus.Opening)
         {
-          if (doorTwoObj.Status == DoorStatus.Open || doorTwoObj.Status == DoorStatus.Opening)
-          {
-            doorTwoObj.CloseDoor();
-          }
-          doorTwoObj.Enabled = false;
-          doorOneObj.Enabled = true;
+          //if (doorinner.Status == DoorStatus.Open || doorinner.Status == DoorStatus.Opening)
+          //{
+            doorInner.CloseDoor();
+            sideDoor.CloseDoor();
+          //}
+          doorInner.Enabled = false;
+          sideDoor.Enabled = false;          
+          doorOuter.Enabled = true;
         }
-        else if (doorTwoObj.Status == DoorStatus.Open)
+      // Inner Door Logic
+        else if (doorInner.Status == DoorStatus.Open || doorInner.Status == DoorStatus.Opening)
         {
-          if (doorOneObj.Status == DoorStatus.Open || doorOneObj.Status == DoorStatus.Opening)
-          {
-            doorOneObj.CloseDoor();
-          }
-          doorTwoObj.Enabled = true;
-          doorOneObj.Enabled = false;
+          //if (doorOuter.Status == DoorStatus.Open || doorOuter.Status == DoorStatus.Opening)
+          //{
+            doorOuter.CloseDoor();            
+          //}
+          doorInner.Enabled = true;
+          sideDoor.Enabled = true;
+          doorOuter.Enabled = false;
         }
-        else if (doorOneObj.Status == DoorStatus.Closed && doorTwoObj.Status == DoorStatus.Closed && airVentObj.Status == VentStatus.Pressurizing)
+      // Pressurizing Space Logic
+        else if (doorOuter.Status == DoorStatus.Closed && doorInner.Status == DoorStatus.Closed && sideDoor.Status == DoorStatus.Closed&& airVentObj.Status == VentStatus.Pressurizing)
         {
-          doorTwoObj.Enabled = false;
-          doorOneObj.Enabled = false;
+          doorInner.CloseDoor();
+          sideDoor.CloseDoor();
+          doorOuter.CloseDoor();
+          doorInner.Enabled = false;
+          doorOuter.Enabled = false;
+          sideDoor.Enabled = false;
         }
+
         else
         {
-          doorTwoObj.Enabled = true;
-          doorOneObj.Enabled = true;
-        }
-      }
+          doorInner.Enabled = true;
+          doorOuter.Enabled = true;
+          sideDoor.Enabled = true;
+        }      
     }
   }
 }
